@@ -1,0 +1,221 @@
+import datetime
+users=[]
+booking_list=[]
+groceryitem=[]
+class groceryList:
+    def __init__(self,groceryid,groceryitems,no_of_item,price):
+        self.groceryId=groceryid
+        self.groceryitems=groceryitems
+        self.no_of_item=no_of_item
+        self.price=price
+class Booking:
+    def __init__(self,userId,bookedat,bookingid,itemdetails):
+        self.userId=userId
+        self.bookedat=bookedat
+        self.bookingid=bookingid
+        self.itemdetails=itemdetails
+class groceryApp:
+    def __init__(self,id,name,email,password,role):
+        self.id=id
+        self.name=name
+        self.email=email
+        self.password=password
+        self.role=role
+    def hardcodeddata(self):
+        users.append(self)
+        return users
+    def validateLogin(self,email,password):
+        for user in users:
+            if user.email==email and user.password==password:
+                return user
+        return None
+    def getusername(self):
+        return self.name
+    def Welcome(self):
+        print("Hi Welcome Customer",self.name)
+class GroceryListings(groceryApp):
+    def __init__(self,id,name,email,password,role):
+        super().__init__(id, name, email, password, role)
+        self.no_of_items=[]
+        self.booking_count=0
+    def handle_card_payment(self,total_amount):
+        print("\n Processing Card Payment")
+        card_number=input("Enter your card number: ")
+        cvv=input("Enter your cvv: ")
+        expiry_date = input("Enter the date(MM/YY): ")
+
+        print("\n Please Confirm Your Payment Details")
+        print(f"Card Number:{card_number}")
+        print(f"Cvv:{cvv}")
+        print(f"Expiry Date:{expiry_date}")
+        print(f"Toatl Amount:{total_amount}")
+
+        confirm=input("Press 'y' to confirm and proceed with the payment or 'n' to cancel: ")
+        if confirm.lower()=='y':
+            print("Payment Successfull.Thanks for using Card!")
+            return True
+        else:
+            print("Payment Cancelled!")
+            return False
+    def booking_for_customer(self):
+
+        stayInCustomerMenu=True
+        grocery1=groceryList(1,"wheat flour",2,200)
+        grocery2=groceryList(2,"biscuits",8,50)
+        grocery3=groceryList(3,"cake",80,800)
+        groceryitem.append(grocery1)
+        groceryitem.append(grocery2)
+        groceryitem.append(grocery3)
+        while stayInCustomerMenu:
+            print("\n************************************")
+            print("Customer Menu")
+            print("1. List of Items")
+            print("2. Select the item")
+            print("3. Booking history")
+            print("4. Delete the history")
+            print("5. Logout ")
+            choice=int(input("Enter your choice: "))
+            if choice==1:
+                for item in groceryitem:
+                    print(item.groceryId)
+                    print(item.groceryitems)
+                    print(item.no_of_item)
+                    print(item.price)
+                    print("---------------------------------")
+            elif choice==2:
+                while True:
+                    for item in groceryitem:
+                        print(item.groceryId,item.groceryitems,item.no_of_item,item.price)
+                    item_id=int(input("Enter the item id: "))
+                    if item_id==0:
+                        break
+                    no_of_item=int(input("Enter the number of items you needed: "))
+                    selected_item=None
+                    for item in groceryitem:
+                        if item.groceryId==item_id:
+                            selected_item=item
+                            break
+                    if selected_item is None:
+                        print("Invalid item id.Please try again.")
+                    else:
+                        total_price = int(selected_item.price)*no_of_item
+                        cart_items={
+                            'groceryId':selected_item.groceryId,
+                            'groceryitems':selected_item.groceryitems,
+                            'number of items':no_of_item,
+                            'unit_price': selected_item.price,
+                            'price':total_price
+                        }
+                        self.no_of_items.append(cart_items)
+
+                        print("Item added to booking successfully.")
+                    view_cart=input("Do u want to see the booking (y/n): ")
+                    if view_cart.lower()=='y':
+                        if len(self.no_of_items)==0:
+                            print("Your booking is empty!")
+                        else:
+                            print("Your Booking")
+                            for piece in self.no_of_items:
+
+                                print("Debug - Current Item Dictionary:", piece)
+                                print("Grocery Id:", piece['groceryId'])
+                                print("Grocery Items:", piece['groceryitems'])
+                                print("Unit Price:", piece['price'])
+                                print("Total Price:", piece['unit_price'])
+                                print("Number of Items:", piece['number of items'])
+
+                                print("-----------------------------------------------")
+
+                            print(f"Total amount to be paid: ",total_price)
+                            print("Payment option:")
+                            print("1. Card")
+                            print("2. Cash")
+                            payment_choice=int(input("Enter your payment choice: "))
+                            payment_successfull=False
+                            if payment_choice==1:
+                                payment_successfull=self.handle_card_payment(total_price)
+                            elif payment_choice==2:
+                                print("Payment successfull! Thank you ")
+                                payment_successfull=True
+                            else:
+                                print("Invalid payment option.")
+                            if payment_successfull:
+                                booking_data = Booking(self.id, datetime.datetime.now(), self.booking_count,
+                                                       self.no_of_items.copy())
+                                booking_list.append(booking_data)
+                                self.no_of_items.clear()  # Clear cart after booking
+                                self.booking_count += 1
+                                print("Booking Confirmed")
+                            else:
+                                print("Booking is not confirmed due to payment failure")
+                            break
+            elif choice==3:
+                for booking in booking_list:
+                    print(f"Booking Count:{booking.bookingid}")
+                    print(f"user id : {booking.userId}")
+                    print(f"Number of items : {booking.bookedat}")
+                    for piece in booking.itemdetails:
+                        print("Grocery Id:", piece['groceryId'])
+                        print("Grocery Items:", piece['groceryitems'])
+                        print("Number of Items:", piece['number of items'])
+                        print("Total Price:", piece['price'])
+                    print("-------------------------------------")
+            elif choice==4:
+                if len(booking_list)==0:
+                    print("No booking history is available.")
+                else:
+                    print("Booking History")
+                    for booking in booking_list:
+                        print("Booking id:",booking.bookingid)
+                        print("User id:",booking.userId)
+                        print("Booked At:",booking.bookedat)
+                        print("--------------------------------------")
+                        delete_choice=input("Enter the booking id to cancel or 'n' to stop deleting: ")
+                        if delete_choice.lower()=='n':
+                            print("Deletion cancelled")
+                        else:
+                            delete_choice=int(delete_choice)
+                            deleted=False
+                            for booking in booking_list:
+                                if booking.bookingid == delete_choice:
+                                    booking_list.remove(booking)
+                                    deleted=True
+                                    break
+                            if deleted:
+                                print("Booking history deleted successfully.")
+                            else:
+                                print("Invalid Booking ID. Please try again.")
+            elif choice == 5:
+                print("Logout Successfully")
+                break
+            else:
+                print("Invalid Entry")
+class AdminFlow(groceryApp):
+    def __init__(self, id, name, email, password, role):
+        super().__init__(id, name, email, password, role)
+
+    def Welcome(self):
+        print('Hi Welcome Admin')
+        print(self.getUserName())
+
+
+if __name__ == "__main__":
+    raji_app=groceryApp(1,"raji","raji123@gmail.com","Raji@123","Customer")
+    raji_app.hardcodeddata()
+    daisy_app=groceryApp(2,"dasiy","daisy12@gmail.com","Daisy@12","Admin")
+    daisy_app.hardcodeddata()
+    login_user=raji_app.validateLogin("raji123@gmail.com","Raji@123")
+    if login_user:
+        print("Login successful")
+        if login_user.role=="Admin":
+            admin=AdminFlow(login_user.id,login_user.name,login_user.email,login_user.password,login_user.role)
+            admin.Welcome()
+        elif login_user.role=="Customer":
+            raji_app.Welcome()
+            book=GroceryListings(login_user.id,login_user.name,login_user.email,login_user.password,login_user.role)
+            book.booking_for_customer()
+
+
+
+
+
