@@ -1,0 +1,252 @@
+import datetime
+users = []
+movieNames = []
+bookings_list = []
+class MovieList:
+    def __init__(self, id, moviename, no_of_ticket, price):
+        self.movieId = id
+        self.movieName = moviename
+        self.no_of_ticket = no_of_ticket
+        self.Price = price
+        self.feedback_list = []
+        self.average_rating = 0
+    def add_feedback(self, feedback):
+        self.feedback_list.append(feedback)
+        self.update_average_rating()
+    def update_average_rating(self):
+        if self.feedback_list:
+            total_rating = sum(feedback.rating for feedback in self.feedback_list)
+            self.average_rating = total_rating / len(self.feedback_list)
+class Feedback:
+    def __init__(self, userId, movieId, rating, comment):
+        self.userId = userId
+        self.movieId = movieId
+        self.rating = rating
+        self.comment = comment
+class Bookings:
+    def __init__(self, BookingID, userId, BookedAt, movieDetails):
+        self.booking_id = BookingID
+        self.userId = userId
+        self.booked_at = BookedAt
+        self.movieDetails = movieDetails
+class ticketApp:
+    booking_count = 0
+    def __init__(self, id: int, Name: str, Email: str, Password: str, Role: str):
+        self.userID = id
+        self.name = Name
+        self.email = Email
+        self.password = Password
+        self.role = Role
+    def hardCodedData(self):
+        users.append(self)
+        return users
+    def validateLogin(self, email, password):
+        for user in users:
+            if user.email == email and user.password == password:
+                return user
+        return None
+    def getUserName(self) -> str:
+        return self.name
+    def Welcome(self):
+        print('Hi Welcome Customer', self.name)
+class movieListings(ticketApp):
+    def __init__(self, id, Name, Email, Password, Role):
+        super().__init__(id, Name, Email, Password, Role)
+        self.no_of_tickets = []  # Initialize an empty cart for the user
+    def handle_card_payment(self, total_amount):
+        print("\nProcessing Card Payment")
+        card_number = input("Enter your Card Number: ")
+        cvv = input("Enter your CVV: ")
+        expiry_date = input("Enter Expiry Date (MM/YY): ")
+        print("\nPlease confirm your payment details:")
+        print(f"Card Number: {card_number}")
+        print(f"CVV: {'*' * (len(cvv) - 1) + cvv[-1]}")  # Masking CVV except last digit
+        print(f"Expiry Date: {expiry_date}")
+        print(f"Total Amount: {total_amount}")
+        confirm = input("Press 'y' to confirm and proceed with the payment or 'n' to cancel: ")
+        if confirm.lower() == 'y':
+            print("Payment successful. Thank you for using card.")
+            return True
+        else:
+            print("Payment canceled.")
+            return False
+    def leave_feedback(self):
+        print("Please provide feedback for the movies you have watched:")
+        for movie in movieNames:
+            print(f"{movie.movieId}. {movie.movieName} (Current Rating: {movie.average_rating})")
+        movie_id = int(input("Enter the ID of the movie you want to leave feedback for: "))
+        rating = int(input("Rating (1-5): "))
+        comment = input("Feedback: ")
+        feedback = Feedback(self.userID, movie_id, rating, comment)
+        for movie in movieNames:
+            if movie.movieId == movie_id:
+                movie.add_feedback(feedback)
+                print("Thank you for your feedback!")
+                break
+    def booking_for_customer(self):
+        stayInCustomerMenu = True
+        movie1 = MovieList(1, 'KGF', 50, 100)
+        movie2 = MovieList(2, 'VARISU', 50, 110)
+        movie3 = MovieList(3, 'VIKIRAM', 60, 120)
+        movieNames.append(movie1)
+        movieNames.append(movie2)
+        movieNames.append(movie3)
+        while stayInCustomerMenu:
+            print("\n************")
+            print("Customer Menu")
+            print("1. List Of Movies")
+            print("2. Select The Movies")
+            print("3. Booked History")
+            print("4. Delete your history")
+            print("5. Feedback for a movie")
+            print("6. Logout")
+            choice = int(input("Enter your Choice: "))
+            if choice == 1:
+                for movie in movieNames:
+                    print(movie.movieId)
+                    print(movie.movieName)
+                    print(movie.no_of_ticket)
+                    print(movie.Price)
+                    print('---------------------------------------------')
+            elif choice == 2:
+                total_price = 0
+                adding_movies = True
+                while adding_movies:
+                    print("Movies List:")
+                    for movie in movieNames:
+                        print(f"{movie.movieId} {movie.movieName} {movie.no_of_ticket} {movie.Price}")
+                        movie_id = int(input("Enter the ID of the movie to add to bookings (0 to complete selection): "))
+                        if movie_id == 0:
+                            adding_movies = False
+                            continue
+                        selected_movie = next((movie for movie in movieNames if movie.movieId == movie_id), None)
+                        if selected_movie:
+                            no_of_ticket = int(input("Enter the number of tickets: "))
+                            item_price = selected_movie.Price * no_of_ticket
+                            cart_item = {
+                                'movieId': selected_movie.movieId,
+                                'movieName': selected_movie.movieName,
+                                'no_of_ticket': no_of_ticket,
+                                'Price': item_price
+                            }
+                            self.no_of_tickets.append(cart_item)
+                            total_price += item_price
+                            print("Movie added to booking successfully.")
+                        else:
+                            print("Invalid movie ID. Please try again.")
+                    if self.no_of_tickets:
+                        print("Your Booking:")
+                        for item in self.no_of_tickets:
+                            print("Movie ID:", item['movieId'])
+                            print("Movie Name:", item['movieName'])
+                            print("Number of Tickets:", item['no_of_ticket'])
+                            print("Price:", item['Price'])
+                            print('---------------------------------------------')
+                        print(f"Total amount to be paid: {total_price}")
+                        print("Payment Options:")
+                        print("1. Card")
+                        print("2. UPI")
+                        payment_choice = int(input("Choose a payment option: "))
+                        payment_successful = False
+                        if payment_choice == 1:
+                            payment_successful = self.handle_card_payment(total_price)
+                        elif payment_choice == 2:
+                            print("Payment successful. Thank you for using UPI.")
+                            payment_successful = True
+                        else:
+                            print("Invalid payment option.")
+                        if payment_successful:
+                            booking_data = Bookings(self.booking_count, self.userID, datetime.datetime.now(),
+                                                    self.no_of_tickets.copy())
+                            bookings_list.append(booking_data)
+                            self.booking_count += 1
+                            self.no_of_tickets.clear()  # Clear the cart after booking
+                            print("Booking confirmed.")
+                        else:
+                            print("Booking not confirmed due to payment failure.")
+                    else:
+                        print("Your booking cart is empty.")
+            elif choice == 3:
+                if not bookings_list:
+                    print("No booking history available.")
+                else:
+                    print("Booking History:")
+                    for booking in reversed(bookings_list):  # Iterate in reverse to follow LIFO (Last In, First Out)
+                        print(f"\nBooking ID: {booking.booking_id}")
+                        print(f"User ID: {booking.userId}")
+                        print(f"Booked At: {booking.booked_at.strftime('%Y-%m-%d %H:%M:%S')}")
+                        total_price = 0
+                        for item in booking.movieDetails:
+                            print(f"Movie ID: {item['movieId']}")
+                            print(f"Movie Name: {item['movieName']}")
+                            print(f"Number of Seats: {item['no_of_ticket']}")
+                            print(f"Price per Seat: {item['Price'] // item['no_of_ticket']}")
+                            print(f"Total Price: {item['Price']}")
+                            total_price += item['Price']
+                            print(f"Total Booking Price: {total_price}")
+                            print('---------------------------------------------')
+            elif choice == 4:
+                if len(bookings_list) == 0:
+                    print("No booking history available.")
+                else:
+                    print("Booking History:")
+                    for booking in bookings_list:
+                        print("Booking ID:", booking.booking_id)
+                        print("User ID:", booking.userId)
+                        print("Booked At:", booking.booked_at)
+                        print('---------------------------------------------')
+                    delete_choice = input("Enter the Booking ID to delete the history (or 'n' to cancel): ")
+                    if delete_choice == 'n':
+                        print("Deletion canceled.")
+                    else:
+                        if bookings_list:
+                            bookings_list.pop()  # Popping from stack
+                            print("Most recent booking history deleted successfully.")
+                        else:
+                            print("No booking history to delete.")
+            elif choice == 5:
+                self.leave_feedback()
+            elif choice == 6:
+                print("Logout Successfully")
+                break
+            else:
+                print("Invalid Entry")
+class AdminFlow(ticketApp):
+    def __init__(self, id, Name, Email, Password, Role):
+        super().__init__(id, Name, Email, Password, Role)
+    def Welcome(self):
+        print('Hi Welcome Admin')
+        print(self.getUserName())
+if __name__ == "__main__":
+    priya_app = ticketApp(1, "Priya", "kamal@gmail.com", "kamal123", "customer")
+    priya_app.hardCodedData()
+    kamali_app = ticketApp(2, "Kamali", "kamali@gmail.com", "kamali123", "Admin")
+    kamali_app.hardCodedData()
+    login_user = priya_app.validateLogin("kamal@gmail.com", "kamal123")
+    if login_user:
+        print('Login Success')
+        if login_user.role == "Admin":
+
+            admin = AdminFlow(login_user.userID, login_user.name, login_user.email, login_user.password,
+                              login_user.role)
+            admin.Welcome()
+        elif login_user.role == "customer":
+            priya_app.Welcome()
+            customer= movieListings(login_user.userID, login_user.name, login_user.email, login_user.password,
+                                 login_user.role)
+            customer.booking_for_customer()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
